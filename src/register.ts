@@ -9,17 +9,23 @@ if (!clientId || !token) {
   process.exit(1);
 }
 
+// Integration types: 0 = Guild Install, 1 = User Install
+// Context types: 0 = Guild, 1 = Bot DM, 2 = Private Channel
 const commands = [
-  new SlashCommandBuilder()
-    .setName('tldr')
-    .setDescription('Get a summary of recent channel activity')
-    .addStringOption((option) =>
-      option
-        .setName('range')
-        .setDescription('Time range (e.g., 24h, 3d, 1w)')
-        .setRequired(true)
-    )
-    .toJSON(),
+  {
+    ...new SlashCommandBuilder()
+      .setName('tldr')
+      .setDescription('Get a summary of recent channel activity')
+      .addStringOption((option) =>
+        option
+          .setName('range')
+          .setDescription('Time range (e.g., 24h, 3d, 1w)')
+          .setRequired(true)
+      )
+      .toJSON(),
+    integration_types: [0, 1], // Guild + User install
+    contexts: [0], // Only in guild channels (needs message history)
+  },
 ];
 
 const rest = new REST().setToken(token);
@@ -34,7 +40,7 @@ async function register() {
     console.log('');
     console.log('Install the bot to your account with this URL:');
     console.log(
-      `https://discord.com/oauth2/authorize?client_id=${clientId}&scope=applications.commands`
+      `https://discord.com/oauth2/authorize?client_id=${clientId}&integration_type=1&scope=applications.commands`
     );
   } catch (error) {
     console.error('Error registering commands:', error);
